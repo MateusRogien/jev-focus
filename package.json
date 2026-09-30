@@ -17,9 +17,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "smoke": "node scripts/build.mjs --smoke && node --env-file-if-exists=.env dist-smoke/smoke.js",
+    "smoke": "node scripts/build.mjs --smoke && node dist-smoke/smoke.js",
     "package": "bash scripts/package.sh",
-    "e2e": "node test/e2e/run.mjs"
+    "e2e": "node test/e2e/run.mjs",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
