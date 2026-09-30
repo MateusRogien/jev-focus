@@ -13,6 +13,7 @@ describe('idFromHref', () => {
     ['/watch?v=abc123DEF_-&list=RDabc&index=2', 'abc123DEF_-'],
     ['/shorts/AbCdEf12345', 'AbCdEf12345'],
     ['/playlist?list=PL123', 'pl:PL123'],
+    ['/show/VLPLoSWVnSA9vG8SK6?sbp=x', 'pl:PLoSWVnSA9vG8SK6'],
     ['https://www.youtube.com/watch?v=xyz789abc', 'xyz789abc'],
     ['/@lofigirl', ''],
   ])('%s → %s', (href, id) => expect(idFromHref(href)).toBe(id));
@@ -95,6 +96,60 @@ describe('extract', () => {
       )!;
     expect(extract(card)).toMatchObject({ id: 'abcdefghijk', channel: 'Chan' });
     expect(surfaceOf(card)).toBe('endscreen');
+  });
+});
+
+describe('live markup (captured from www.youtube.com, 2026-09-30)', () => {
+  it('reads a camelCase view-model mix lockup, including its listed videos', () => {
+    const card =
+      html(`<ytd-search><yt-lockup-view-model class="ytLockupViewModelWrapper"><div class="ytLockupViewModelHost">
+      <a href="/watch?v=oMRijktGkVs&amp;list=RDEMwT6HSBpGX0ZJerBB3rWMjg&amp;start_radio=1" class="ytLockupViewModelContentImage">
+        <yt-collection-thumbnail-view-model><yt-thumbnail-view-model><yt-thumbnail-overlay-badge-view-model><yt-thumbnail-badge-view-model>
+          <badge-shape class="ytBadgeShapeHost"><div class="ytBadgeShapeText">Mix</div></badge-shape>
+        </yt-thumbnail-badge-view-model></yt-thumbnail-overlay-badge-view-model></yt-thumbnail-view-model></yt-collection-thumbnail-view-model></a>
+      <div class="ytLockupViewModelMetadata"><yt-lockup-metadata-view-model><div class="ytLockupMetadataViewModelTextContainer">
+        <h3 class="ytLockupMetadataViewModelHeadingReset" title="YouTube Mix"><a href="/watch?v=oMRijktGkVs&amp;list=RDEMwT6HSBpGX0ZJerBB3rWMjg" class="ytLockupMetadataViewModelTitle"><span>YouTube Mix</span></a></h3>
+        <div class="ytLockupMetadataViewModelMetadata"><yt-content-metadata-view-model class="ytContentMetadataViewModelHost">
+          <div class="ytContentMetadataViewModelMetadataRow"><span class="ytContentMetadataViewModelMetadataText">Personalized mix for you</span></div>
+          <div class="ytContentMetadataViewModelMetadataRow"><span class="ytContentMetadataViewModelMetadataText"><a href="/watch?v=oMRijktGkVs&amp;list=RDEM">12 Most Beautiful Violin &amp; Piano Adagios - Relaxing Classical Music for the Soul · 1:19:02</a></span></div>
+          <div class="ytContentMetadataViewModelMetadataRow"><span class="ytContentMetadataViewModelMetadataText"><a href="/watch?v=4WIMyqBG9gs&amp;list=RDEM">Fantasy Medieval Music for Focus &amp; Calm · 2:01:33</a></span></div>
+        </yt-content-metadata-view-model></div></div></yt-lockup-metadata-view-model></div>
+    </div></yt-lockup-view-model></ytd-search>`).querySelector('yt-lockup-view-model')!;
+    const m = extract(card)!;
+    expect(m.id).toBe('oMRijktGkVs');
+    expect(m.title).toBe('YouTube Mix');
+    expect(m.badges).toContain('Mix');
+    expect(m.includes).toEqual([
+      '12 Most Beautiful Violin & Piano Adagios - Relaxing Classical Music for the Soul',
+      'Fantasy Medieval Music for Focus & Calm',
+    ]);
+    expect(surfaceOf(card)).toBe('search');
+  });
+
+  it('reads the duration from a camelCase badge', () => {
+    const card =
+      html(`<ytd-video-renderer><ytd-thumbnail><a id="thumbnail" href="/watch?v=sjkrrmBnpGE&amp;pp=x"></a>
+      <div class="thumbnail-overlay-badge-shape"><badge-shape class="ytBadgeShapeHost" aria-label="3 hours, 57 minutes, 52 seconds"><div class="ytBadgeShapeText">3:57:52</div></badge-shape></div></ytd-thumbnail>
+      <a id="video-title" title="Ambient Study Music To Concentrate"></a><ytd-channel-name><div id="text">Quiet Quest - Study Music</div></ytd-channel-name></ytd-video-renderer>`);
+    expect(extract(card)).toMatchObject({
+      id: 'sjkrrmBnpGE',
+      duration: '3:57:52',
+      channel: 'Quiet Quest - Study Music',
+    });
+  });
+
+  it('reads a v2 Shorts lockup', () => {
+    const card =
+      html(`<ytm-shorts-lockup-view-model-v2 class="shortsLockupViewModelHost"><ytm-shorts-lockup-view-model class="shortsLockupViewModelHost">
+      <a href="/shorts/4Z91tH3VFLI" class="shortsLockupViewModelHostEndpoint reel-item-endpoint"></a>
+      <h3 class="shortsLockupViewModelHostMetadataTitle"><a href="/shorts/4Z91tH3VFLI" title="Study Music Alpha Waves">Study Music Alpha Waves</a></h3>
+    </ytm-shorts-lockup-view-model></ytm-shorts-lockup-view-model-v2>`);
+    expect(isShort(card)).toBe(true);
+    expect(extract(card)).toMatchObject({
+      id: '4Z91tH3VFLI',
+      title: 'Study Music Alpha Waves',
+      badges: ['Shorts'],
+    });
   });
 });
 

@@ -48,6 +48,9 @@ export function idFromHref(href: string): string {
   if (shorts) return shorts[1]!;
   const list = u.searchParams.get('list');
   if (list) return `pl:${list}`;
+  // Shows and courses: /show/VL<playlist id>
+  const show = u.pathname.match(/^\/show\/(?:VL)?([\w-]{6,})/);
+  if (show) return `pl:${show[1]}`;
   return '';
 }
 
@@ -112,8 +115,24 @@ export function extract(card: Element): VideoMeta | undefined {
   }
   if (isShort(card)) badges.add('Shorts');
   if (id.startsWith('pl:')) badges.add('Playlist');
+  // Not list=RD in the link: search results for music now open as a radio too.
+  if (card.querySelector('yt-collection-thumbnail-view-model')) {
+    badges.add(/\bmix\b/i.test(first(card, S.DURATION)) ? 'Mix' : 'Playlist');
+  }
 
-  return { id, title, channel, duration, badges: [...badges] };
+  const meta: VideoMeta = { id, title, channel, duration, badges: [...badges] };
+  if (badges.has('Mix') || badges.has('Playlist')) {
+    const seen = new Set<string>();
+    for (const sel of S.COLLECTION_ITEMS) {
+      card.querySelectorAll(sel).forEach((a) => {
+        // "Video title · 1:19:02" → "Video title"
+        const t = text(a).replace(/\s+·\s+[\d:]+$/, '');
+        if (t && t !== title && seen.size < 2) seen.add(t);
+      });
+    }
+    if (seen.size) meta.includes = [...seen];
+  }
+  return meta;
 }
 
 export function surfaceOf(card: Element): SurfaceId | undefined {

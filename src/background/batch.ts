@@ -42,6 +42,8 @@ export function describeVideo(v: VideoMeta): string {
   if (v.channel) lines.push(`Channel: ${clip(v.channel, CHANNEL_MAX)}`);
   if (v.duration) lines.push(`Duration: ${v.duration}`);
   if (v.badges.length) lines.push(`Badges: ${v.badges.join(', ')}`);
+  if (v.includes?.length)
+    lines.push(`Includes: ${v.includes.map((t) => clip(t, 120)).join(' / ')}`);
   return lines.join('\n');
 }
 

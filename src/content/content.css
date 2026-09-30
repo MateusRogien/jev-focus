@@ -78,8 +78,8 @@ html:not([data-jf-off]) :where(__HORIZ__)::before {
 }
 html:not([data-jf-off]) ytd-video-renderer::before,
 html:not([data-jf-off]) ytd-search yt-lockup-view-model::before {
-  width: min(45%, 360px);
-  padding-top: min(25.3%, 202px);
+  width: min(50%, 500px);
+  padding-top: min(28.125%, 281px);
 }
 html:not([data-jf-off]) :where(__HORIZ__)::after {
   left: calc(min(40%, 168px) + 8px);
@@ -89,7 +89,7 @@ html:not([data-jf-off]) :where(__HORIZ__)::after {
 }
 html:not([data-jf-off]) ytd-video-renderer::after,
 html:not([data-jf-off]) ytd-search yt-lockup-view-model::after {
-  left: calc(min(45%, 360px) + 16px);
+  left: calc(min(50%, 500px) + 16px);
 }
 
 /* Shorts card: one tall block. */

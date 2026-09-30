@@ -60,6 +60,8 @@ export interface VideoMeta {
   channel: string;
   duration: string;
   badges: string[];
+  /** Mixes and playlists only: the first video titles listed on the card. */
+  includes?: string[];
 }
 
 export type Verdict = 'allow' | 'block';

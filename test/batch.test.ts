@@ -54,6 +54,13 @@ describe('questionsFor', () => {
   });
 });
 
+describe('describeVideo with a mix', () => {
+  it('lists included videos', () => {
+    const q = questionsFor({ ...vid(3), badges: ['Mix'], includes: ['A', 'B'] }, music)[0]!;
+    expect(q.instructions).toContain('Includes: A / B');
+  });
+});
+
 describe('buildBatches', () => {
   it('puts a normal screenful in one request', () => {
     const batches = buildBatches(

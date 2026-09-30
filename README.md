@@ -99,7 +99,7 @@ asked, so listed channels never cost an API call.
 What leaves the browser, for each card on a surface you've turned on:
 
 - the video **title**, **channel name**, **duration**, and visible **badges** (LIVE, Premiere,
-  Shorts, Playlist)
+  Shorts, Mix, Playlist); for mixes and playlists, the first two video titles listed on the card
 - your profile's category names and descriptions
 
 It is sent only to the provider you selected, over HTTPS, from the service worker, with no

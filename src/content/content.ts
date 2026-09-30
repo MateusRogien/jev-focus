@@ -15,6 +15,10 @@ const CARD = S.ALL_CARDS.join(',');
 const DEBOUNCE_MS = 150;
 const MAX_WAIT_MS = 400;
 const RETRY_HELD_MS = 20_000;
+/** Re-check cards whose data hasn't rendered yet, in case no further mutation arrives. */
+const INCOMPLETE_RECHECK_MS = 400;
+/** After this long without a title and link, stop waiting and apply the failure mode. */
+const INCOMPLETE_GIVE_UP_MS = 5000;
 const CONFIG_KEY = 'contentConfig';
 
 type State = 'pending' | 'allowed' | 'pass' | 'blocked' | 'gone' | 'held';
@@ -32,6 +36,7 @@ const held = new Set<Element>();
 /** Verdicts for this page's profile, so re-rendered cards resolve without a round trip. */
 let memo = new Map<string, 'allow' | 'block'>();
 const hiddenOnPage = new Set<string>();
+const queuedAt = new WeakMap<Element, number>();
 
 let flushTimer: ReturnType<typeof setTimeout> | undefined;
 let firstQueuedAt = 0;
@@ -128,6 +133,7 @@ function consider(card: Element) {
   if (id && decidedFor.get(card) === id && state && state !== 'pending') return;
   if (id !== decidedFor.get(card) && state && state !== 'pending') setState(card, 'pending');
   if (resolveLocally(card)) return;
+  if (!queue.has(card)) queuedAt.set(card, performance.now());
   queue.add(card);
   scheduleFlush();
 }
@@ -155,7 +161,19 @@ async function flush() {
       continue;
     }
     const meta = extract(card);
-    if (!meta) continue; // not rendered yet; the next mutation re-flushes
+    if (!meta) {
+      // Not rendered yet. Keep waiting, but not forever: a card must never stay a skeleton.
+      if (performance.now() - (queuedAt.get(card) ?? 0) > INCOMPLETE_GIVE_UP_MS) {
+        queue.delete(card);
+        if (config.failOpen) setState(card, 'allowed');
+        else {
+          setState(card, 'held');
+          held.add(card);
+          scheduleRetry();
+        }
+      }
+      continue;
+    }
     queue.delete(card);
     setState(card, 'pending');
     const list = byId.get(meta.id);
@@ -165,6 +183,8 @@ async function flush() {
       videos.push(meta);
     }
   }
+  // Some cards fill in via text or attribute changes the observer doesn't watch.
+  if (queue.size && !flushTimer) flushTimer = setTimeout(flush, INCOMPLETE_RECHECK_MS);
   if (!videos.length) return;
 
   const profileKey = config.profileKey;

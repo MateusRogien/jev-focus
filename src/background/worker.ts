@@ -123,7 +123,22 @@ function sanitise(videos: unknown): VideoMeta[] {
     const title = str(v?.title, 300);
     if (!id || !title) return [];
     const badges = Array.isArray(v.badges) ? v.badges.map((b) => str(b, 20)).slice(0, 4) : [];
-    return [{ id, title, channel: str(v.channel, 120), duration: str(v.duration, 16), badges }];
+    const includes = Array.isArray(v.includes)
+      ? v.includes
+          .map((t) => str(t, 160))
+          .filter(Boolean)
+          .slice(0, 2)
+      : [];
+    return [
+      {
+        id,
+        title,
+        channel: str(v.channel, 120),
+        duration: str(v.duration, 16),
+        badges,
+        ...(includes.length ? { includes } : {}),
+      },
+    ];
   });
 }
 
