@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=360" />
+    <title>Jev Focus</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main id="app">
+      <header class="top">
+        <svg class="mark" viewBox="0 0 16 16" aria-hidden="true">
+          <circle cx="8" cy="6.5" r="3" fill="currentColor" />
+          <rect x="2.5" y="11" width="11" height="1.5" rx="0.75" fill="currentColor" />
+        </svg>
+        <span class="name">Jev Focus</span>
+        <label class="switch" title="Filtering on/off">
+          <input type="checkbox" id="enabled" aria-label="Filtering on" />
+          <span></span>
+        </label>
+      </header>
+
+      <button type="button" class="profile card" id="profile" aria-expanded="false">
+        <span class="picon" id="profile-icon"></span>
+        <span class="ptext">
+          <span class="pname" id="profile-name">Deep Work</span>
+          <span class="pmeta small muted" id="profile-meta"></span>
+        </span>
+        <span class="chev" id="profile-chev"></span>
+      </button>
+
+      <ul class="plist card" id="plist" hidden></ul>
+
+      <dl class="stats" id="stats">
+        <div>
+          <dt>Hidden on this page</dt>
+          <dd class="num ember" id="s-page">—</dd>
+        </div>
+        <div>
+          <dt>Hidden today</dt>
+          <dd class="num" id="s-today">0</dd>
+        </div>
+        <div>
+          <dt>API calls today</dt>
+          <dd class="num" id="s-calls">0</dd>
+        </div>
+        <div>
+          <dt>Cost today</dt>
+          <dd class="num" id="s-cost">$0.00</dd>
+        </div>
+      </dl>
+
+      <footer class="foot">
+        <p class="status" id="status">Checking…</p>
+        <a href="#" id="open-options" class="small">Options</a>
+      </footer>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
