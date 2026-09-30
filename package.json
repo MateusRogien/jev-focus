@@ -1,0 +1,36 @@
+{
+  "name": "jev-focus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A YouTube focus filter powered by TypeSafe Jev.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "icons": "node scripts/icons.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "smoke": "node scripts/build.mjs --smoke && node --env-file-if-exists=.env dist-smoke/smoke.js",
+    "package": "bash scripts/package.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/chrome": "^0.3.4",
+    "@types/node": "^26.6.3",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.11.0",
+    "happy-dom": "^20.14.5",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.0",
+    "vitest": "^5.0.3"
+  }
+}

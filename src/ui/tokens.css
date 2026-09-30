@@ -1,0 +1,102 @@
+/*
+ * Jev Focus design tokens. See docs/DESIGN.md for rationale and usage rules.
+ * Dark is the default; light follows the OS unless the page sets data-theme.
+ */
+
+:root {
+  color-scheme: dark light;
+
+  /* Colour: dark (default) */
+  --ink: #0e0f13;
+  --surface: #16181f;
+  --raised: #1e212a;
+  --line: #2a2e39;
+  --text: #ecedef;
+  --muted: #8a8f9c;
+  --lamp: #e8b86d;
+  --on-lamp: #0e0f13;
+  --sage: #8fb9a8;
+  --ember: #e07a6b;
+  --lamp-wash: rgb(232 184 109 / 0.12);
+  --ember-wash: rgb(224 122 107 / 0.12);
+  --sage-wash: rgb(143 185 168 / 0.12);
+
+  /* Type */
+  --font: ui-sans-serif, -apple-system, 'Segoe UI', Inter, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 15px;
+  --fs-lg: 20px;
+  --fs-xl: 28px;
+  --lh-tight: 1.2;
+  --lh-body: 1.45;
+  --fw-regular: 400;
+  --fw-medium: 520;
+  --fw-bold: 640;
+
+  /* Space: 4-pt grid */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 20px;
+  --s6: 24px;
+  --s8: 32px;
+  --s10: 40px;
+  --s12: 48px;
+
+  /* Radius */
+  --r-control: 8px;
+  --r-card: 12px;
+  --r-pill: 999px;
+
+  /* Motion: one curve everywhere */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --t-ui: 150ms;
+  --t-collapse: 220ms;
+
+  /* Focus ring */
+  --ring: 0 0 0 2px var(--ink), 0 0 0 4px var(--lamp);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --ink: #f5f2ec;
+    --surface: #fffdf9;
+    --raised: #ece8e0;
+    --line: #ddd7cc;
+    --text: #1a1b1f;
+    --muted: #5c606b;
+    --lamp: #8a5a14;
+    --on-lamp: #fffdf9;
+    --sage: #2f6b55;
+    --ember: #a93e30;
+    --lamp-wash: rgb(138 90 20 / 0.1);
+    --ember-wash: rgb(169 62 48 / 0.1);
+    --sage-wash: rgb(47 107 85 / 0.1);
+  }
+}
+
+:root[data-theme='light'] {
+  --ink: #f5f2ec;
+  --surface: #fffdf9;
+  --raised: #ece8e0;
+  --line: #ddd7cc;
+  --text: #1a1b1f;
+  --muted: #5c606b;
+  --lamp: #8a5a14;
+  --on-lamp: #fffdf9;
+  --sage: #2f6b55;
+  --ember: #a93e30;
+  --lamp-wash: rgb(138 90 20 / 0.1);
+  --ember-wash: rgb(169 62 48 / 0.1);
+  --sage-wash: rgb(47 107 85 / 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-ui: 0ms;
+    --t-collapse: 0ms;
+  }
+}

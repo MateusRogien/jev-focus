@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <title>Jev Focus</title>
+  <rect width="16" height="16" rx="3.5" fill="#0E0F13"/>
+  <circle cx="8" cy="7" r="3" fill="#E8B86D"/>
+  <rect x="2.5" y="11.5" width="11" height="1.5" rx="0.75" fill="#E8B86D"/>
+</svg>

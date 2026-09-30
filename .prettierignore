@@ -1,0 +1,4 @@
+dist/
+dist-smoke/
+package-lock.json
+*.zip
