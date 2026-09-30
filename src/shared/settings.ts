@@ -26,6 +26,7 @@ export function defaultSettings(): Settings {
     providers,
     activeProfileId: DEFAULT_PROFILE_ID,
     customProfiles: [],
+    strictnessOverrides: {},
     surfaces: {
       home: true,
       watch: true,
@@ -54,6 +55,7 @@ export function withDefaults(raw: unknown): Settings {
     ...s,
     providers,
     surfaces: { ...d.surfaces, ...s.surfaces },
+    strictnessOverrides: { ...s.strictnessOverrides },
     provider: s.provider && s.provider in PROVIDERS ? s.provider : d.provider,
   };
 }
@@ -69,8 +71,14 @@ export async function saveSettings(patch: Partial<Settings>): Promise<Settings> 
   return next;
 }
 
+export function profileById(s: Settings, id: string): Profile {
+  const p = findProfile(s.customProfiles, id);
+  const override = p.builtin ? s.strictnessOverrides[p.id] : undefined;
+  return override ? { ...p, strictness: override } : p;
+}
+
 export function activeProfile(s: Settings): Profile {
-  return findProfile(s.customProfiles, s.activeProfileId);
+  return profileById(s, s.activeProfileId);
 }
 
 export async function loadKey(provider: ProviderId): Promise<string> {

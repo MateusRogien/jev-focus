@@ -18,7 +18,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "smoke": "node scripts/build.mjs --smoke && node --env-file-if-exists=.env dist-smoke/smoke.js",
-    "package": "bash scripts/package.sh"
+    "package": "bash scripts/package.sh",
+    "e2e": "node test/e2e/run.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -28,6 +29,7 @@
     "esbuild": "^0.28.2",
     "eslint": "^10.11.0",
     "happy-dom": "^20.14.5",
+    "playwright-core": "^1.63.0",
     "prettier": "^3.9.9",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.71.0",

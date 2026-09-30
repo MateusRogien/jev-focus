@@ -15,7 +15,22 @@ export default tseslint.config(
     },
   },
   {
-    files: ['scripts/**'],
+    files: ['scripts/**', 'test/e2e/**'],
+    languageOptions: {
+      globals: { Buffer: 'readonly', setTimeout: 'readonly', fetch: 'readonly', URL: 'readonly' },
+    },
     rules: { 'no-console': 'off' },
+  },
+  {
+    // Page functions passed to page.evaluate / addInitScript run in the browser.
+    files: ['test/e2e/**'],
+    languageOptions: {
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        getComputedStyle: 'readonly',
+        requestAnimationFrame: 'readonly',
+      },
+    },
   },
 );

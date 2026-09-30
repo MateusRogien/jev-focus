@@ -1,0 +1,82 @@
+<!doctype html>
+<html dark="true">
+  <head>
+    <meta charset="utf-8" />
+    <title>Watch</title>
+    <style>
+      body {
+        margin: 0;
+        background: #0f0f0f;
+        color: #f1f1f1;
+        font-family: Arial;
+      }
+      ytd-watch-flexy {
+        display: flex;
+        gap: 24px;
+        padding: 24px;
+      }
+      #primary {
+        flex: 1;
+      }
+      #primary .player {
+        aspect-ratio: 16/9;
+        background: #222;
+        border-radius: 12px;
+      }
+      #secondary {
+        width: 400px;
+      }
+      yt-lockup-view-model {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .thumb {
+        width: 168px;
+        aspect-ratio: 16/9;
+        background: linear-gradient(135deg, #c33, #36c);
+        border-radius: 8px;
+        flex: none;
+      }
+      h3 {
+        font-size: 14px;
+        margin: 0;
+      }
+      .meta {
+        color: #aaa;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <ytd-app
+      ><ytd-watch-flexy
+        ><div id="primary">
+          <div class="player"></div>
+          <h1>lofi hip hop radio</h1>
+        </div>
+        <div id="secondary">
+          <ytd-watch-next-secondary-results-renderer
+            ><div id="items"></div
+          ></ytd-watch-next-secondary-results-renderer></div></ytd-watch-flexy
+    ></ytd-app>
+    <script>
+      const items = [
+        ['v0', 'lofi hip hop radio 📚 beats to relax/study to', 'Lofi Girl'],
+        ['v1', 'I Spent 50 Hours Buried Alive', 'MrBeast'],
+        ['v8', 'Brian Eno - Music For Airports (Full Album)', 'Brian Eno'],
+        ['v5', 'Minecraft Hardcore Day 100 FINALE!!!', 'Forge Labs'],
+      ];
+      const box = document.getElementById('items');
+      setTimeout(
+        () =>
+          items.forEach(([id, t, c]) => {
+            const el = document.createElement('yt-lockup-view-model');
+            el.innerHTML = `<a class="thumb" href="/watch?v=${id}"></a><div><h3 class="yt-lockup-metadata-view-model__title">${t}</h3><div class="yt-content-metadata-view-model__metadata-text meta">${c}</div></div>`;
+            box.append(el);
+          }),
+        40,
+      );
+    </script>
+  </body>
+</html>

@@ -2,7 +2,6 @@ import { callJev, JevError } from '../api/jev';
 import { PROVIDERS } from '../api/providers';
 import { decide } from '../shared/decision';
 import type {
-  Broadcast,
   ClassifyResponse,
   ContentConfig,
   Request,
@@ -16,8 +15,17 @@ import { buildBatches, readBatch } from './batch';
 import { ClassificationCache, type KV } from './cache';
 import { Classifier } from './classifier';
 
-// Keep the key (and everything else in local) out of content scripts.
-chrome.storage.local.setAccessLevel?.({ accessLevel: 'TRUSTED_CONTEXTS' }).catch(() => undefined);
+function setAccess(area: chrome.storage.StorageArea, accessLevel: string) {
+  try {
+    const p = area.setAccessLevel?.({ accessLevel } as never) as Promise<void> | undefined;
+    p?.catch(() => undefined);
+  } catch {
+    // Not supported for this area in this browser.
+  }
+}
+
+// Keep the key (and everything else in local) out of content scripts where supported.
+setAccess(chrome.storage.local, 'TRUSTED_CONTEXTS');
 
 const kv: KV = {
   get: async (k) => (await chrome.storage.local.get(k))[k],
@@ -50,12 +58,16 @@ async function setStatus(next: ApiStatus) {
   await chrome.storage.local.set({ [KEYS.apiStatus]: next });
 }
 
-const profileKeyOf = (s: Settings) => {
+/** Cache namespace: changes when what Jev is asked changes (not on strictness). */
+const cacheNamespace = (s: Settings) => {
   const p = activeProfile(s);
   return `${p.id}.${profileFingerprint(p)}`;
 };
 
-function contentConfig(s: Settings): ContentConfig {
+/** What content scripts key their decisions on: also changes with strictness. */
+const profileKeyOf = (s: Settings) => `${cacheNamespace(s)}.${activeProfile(s).strictness}`;
+
+function contentConfig(s: Settings, hasKey: boolean): ContentConfig {
   const p = activeProfile(s);
   return {
     enabled: s.enabled,
@@ -64,6 +76,8 @@ function contentConfig(s: Settings): ContentConfig {
     surfaces: s.surfaces,
     hideShorts: s.hideShortsEverywhere || p.hideShorts,
     showPill: s.showPill,
+    hasKey,
+    failOpen: s.failMode === 'open',
   };
 }
 
@@ -77,37 +91,26 @@ async function addStats(hidden: number, apiCalls: number, inputTokens: number) {
   await chrome.storage.local.set({ [KEYS.stats]: s });
 }
 
-// YouTube tabs that asked for config, so setting changes can be pushed to them.
-// tabs.sendMessage needs a tab id, not the `tabs` permission.
-const tabs = new Set<number>();
-const tabsReady = chrome.storage.session
-  .get('tabs')
-  .then((r) => (r.tabs as number[] | undefined)?.forEach((t) => tabs.add(t)))
-  .catch(() => undefined);
+// The content script reads its (non-secret) config from storage.session, which is opened
+// to content scripts; storage.local, which holds the key, is not.
+const CONFIG_KEY = 'contentConfig';
+setAccess(chrome.storage.session, 'TRUSTED_AND_UNTRUSTED_CONTEXTS');
 
-async function rememberTab(id: number | undefined) {
-  if (id === undefined || tabs.has(id)) return;
-  tabs.add(id);
-  await chrome.storage.session.set({ tabs: [...tabs] });
-}
-
-async function broadcast(msg: Broadcast) {
-  await tabsReady;
-  for (const id of [...tabs]) {
-    chrome.tabs.sendMessage(id, msg).catch(() => {
-      tabs.delete(id);
-      void chrome.storage.session.set({ tabs: [...tabs] });
-    });
-  }
+async function publishConfig(): Promise<ContentConfig> {
+  const s = await loadSettings();
+  const config = contentConfig(s, (await loadKey(s.provider)).length > 0);
+  await chrome.storage.session.set({ [CONFIG_KEY]: config });
+  return config;
 }
 
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes[KEYS.settings]) {
-    void loadSettings().then((s) => broadcast({ type: 'config', config: contentConfig(s) }));
-  }
+  if (area === 'local' && (changes[KEYS.settings] || changes[KEYS.apiKeys])) void publishConfig();
 });
 
+chrome.runtime.onStartup.addListener(() => void publishConfig());
+
 chrome.runtime.onInstalled.addListener((d) => {
+  void publishConfig();
   if (d.reason === 'install') void chrome.runtime.openOptionsPage();
 });
 
@@ -136,12 +139,10 @@ const errorText = (kind: ApiErrorKind, status?: number): string =>
     'bad-response': 'Unexpected response from provider',
   })[kind];
 
-async function handle(msg: Request, sender: chrome.runtime.MessageSender): Promise<unknown> {
+async function handle(msg: Request): Promise<unknown> {
   switch (msg.type) {
-    case 'getConfig': {
-      await rememberTab(sender.tab?.id);
-      return contentConfig(await loadSettings());
-    }
+    case 'getConfig':
+      return publishConfig();
 
     case 'classify': {
       const s = await loadSettings();
@@ -155,7 +156,7 @@ async function handle(msg: Request, sender: chrome.runtime.MessageSender): Promi
       const out = await classifier.classify({
         videos: sanitise(msg.videos),
         profile: activeProfile(s),
-        profileKey,
+        profileKey: cacheNamespace(s),
         failMode: s.failMode,
         channelAllow: s.channelAllow,
         channelBlock: s.channelBlock,
@@ -254,18 +255,14 @@ async function handle(msg: Request, sender: chrome.runtime.MessageSender): Promi
         await chrome.runtime.openOptionsPage();
       }
       return {};
-
-    case 'configChanged':
-      await broadcast({ type: 'config', config: contentConfig(await loadSettings()) });
-      return {};
   }
 }
 
-chrome.runtime.onMessage.addListener((msg: Request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg: Request, _sender, sendResponse) => {
   // Only our own extension pages and content scripts can reach this listener
   // (no externally_connectable), but reject anything malformed anyway.
   if (!msg || typeof msg !== 'object' || typeof msg.type !== 'string') return false;
-  handle(msg, sender).then(sendResponse, (err) => {
+  handle(msg).then(sendResponse, (err) => {
     console.error('Jev Focus worker:', err instanceof Error ? err.message : 'error');
     sendResponse(undefined);
   });

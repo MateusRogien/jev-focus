@@ -8,7 +8,9 @@ export interface ContentConfig {
   surfaces: Record<SurfaceId, boolean>;
   hideShorts: boolean;
   showPill: boolean;
-  reducedMotion?: boolean;
+  /** Whether a key is set; flipping it retries cards held by fail-closed. */
+  hasKey: boolean;
+  failOpen: boolean;
 }
 
 export type Request =
@@ -18,8 +20,7 @@ export type Request =
   | { type: 'testProfile'; profile: Profile; title: string; channel: string }
   | { type: 'clearCache' }
   | { type: 'cacheSize' }
-  | { type: 'openPopup' }
-  | { type: 'configChanged' };
+  | { type: 'openPopup' };
 
 export interface ClassifyResponse {
   profileKey: string;
@@ -43,8 +44,8 @@ export interface TestProfileResponse {
   latencyMs?: number;
 }
 
-/** Sent from the worker to content scripts. */
-export type Broadcast = { type: 'config'; config: ContentConfig } | { type: 'pageStats' };
+/** Sent from the popup to the active tab's content script. */
+export type TabRequest = { type: 'pageStats' };
 
 export interface PageStats {
   hidden: number;

@@ -43,6 +43,8 @@ export interface Settings {
   activeProfileId: string;
   /** User-created profiles. Presets are merged in at read time. */
   customProfiles: Profile[];
+  /** Strictness chosen for a preset, which is otherwise read-only. */
+  strictnessOverrides: Record<string, Strictness>;
   surfaces: Record<SurfaceId, boolean>;
   hideShortsEverywhere: boolean;
   failMode: FailMode;

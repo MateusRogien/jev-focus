@@ -1,0 +1,179 @@
+<!doctype html>
+<html dark="true" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>YouTube</title>
+    <style>
+      body {
+        margin: 0;
+        background: #0f0f0f;
+        color: #f1f1f1;
+        font-family: Roboto, Arial, sans-serif;
+      }
+      html:not([dark]) body {
+        background: #fff;
+        color: #0f0f0f;
+      }
+      ytd-app,
+      ytd-browse,
+      ytd-rich-grid-renderer,
+      ytd-rich-item-renderer,
+      yt-lockup-view-model,
+      ytd-rich-section-renderer,
+      ytd-rich-shelf-renderer {
+        display: block;
+      }
+      ytd-rich-grid-renderer > #contents {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 24px;
+      }
+      ytd-rich-item-renderer {
+        width: calc(25% - 12px);
+      }
+      ytd-rich-section-renderer {
+        width: 100%;
+      }
+      ytd-rich-shelf-renderer #contents {
+        display: flex;
+        gap: 12px;
+      }
+      ytd-rich-shelf-renderer ytd-rich-item-renderer {
+        width: 180px;
+      }
+      .thumb {
+        aspect-ratio: 16/9;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #c33, #36c);
+        display: flex;
+        align-items: end;
+        justify-content: end;
+        padding: 6px;
+        box-sizing: border-box;
+      }
+      [is-slim-media] .thumb {
+        aspect-ratio: 9/16;
+      }
+      .badge {
+        background: #000c;
+        color: #fff;
+        font-size: 12px;
+        padding: 2px 4px;
+        border-radius: 4px;
+      }
+      h3 {
+        font-size: 16px;
+        margin: 12px 0 4px;
+      }
+      .meta {
+        color: #aaa;
+        font-size: 14px;
+      }
+      #masthead {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="masthead">YouTube (fixture)</div>
+    <ytd-app></ytd-app>
+    <script>
+      const FEED = [
+        ['v0', 'lofi hip hop radio 📚 beats to relax/study to', 'Lofi Girl', 'LIVE'],
+        ['v1', 'I Spent 50 Hours Buried Alive', 'MrBeast', '12:21'],
+        ['v2', 'Bach - Cello Suite No.1 in G major, Prélude (Yo-Yo Ma)', 'Yo-Yo Ma', '2:32'],
+        ['v3', "You Won't BELIEVE What Happened Next… 😱", 'Daily Dose Of Internet', '5:01'],
+        [
+          'v4',
+          'Heavy Rain on a Tin Roof for Sleeping — 10 Hours',
+          'Relaxing Ambience ASMR',
+          '10:00:00',
+        ],
+        ['v5', 'Minecraft Hardcore Day 100 FINALE!!!', 'Forge Labs', '41:02'],
+        [
+          'v6',
+          'Coffee Shop Jazz Piano | Smooth Instrumental Jazz Playlist',
+          'Cafe Music BGM channel',
+          '11:54:30',
+        ],
+        ['v7', 'The Weeknd - Blinding Lights (Official Video)', 'TheWeekndVEVO', '4:22'],
+        ['v8', 'Brian Eno - Music For Airports (Full Album)', 'Brian Eno', '48:02'],
+        ['v9', 'Top 10 Most Shocking Celebrity Feuds of 2026', 'WatchMojo.com', '13:44'],
+        ['v10', 'Study With Me 4 Hours | Pomodoro 50/10 | Rain Sounds', 'Merve', '4:02:11'],
+        ['v11', 'Breaking: Markets Plunge as Fed Holds Rates', 'CNBC Television', '8:14'],
+      ];
+      const MORE = [
+        ['v12', 'Chopin - Nocturnes (Complete) | Classical Piano', 'Halidon Music', '1:52:10'],
+        ['v13', 'iPhone 18 Pro Unboxing: THE TRUTH', 'Unbox Therapy', '9:48'],
+        ['v14', 'Deep Space Drone — Interstellar Ambient for Focus', 'Cryo Chamber', '2:00:00'],
+        ['v15', 'Stardew Valley but I can only eat fish', 'Hat Films', '32:10'],
+      ];
+      function shell(slim) {
+        const el = document.createElement('ytd-rich-item-renderer');
+        if (slim) el.setAttribute('is-slim-media', '');
+        return el;
+      }
+      function fill(el, [id, title, channel, dur], short) {
+        const href = short ? `/shorts/${id}xxxxxx` : `/watch?v=${id}`;
+        el.innerHTML = `<yt-lockup-view-model><a href="${href}" class="thumb"><span class="badge">${dur}</span></a>
+    <h3 class="yt-lockup-metadata-view-model__title" title="">${title}</h3>
+    <div class="yt-content-metadata-view-model__metadata-text meta">${channel}</div></yt-lockup-view-model>`;
+      }
+      const app = document.querySelector('ytd-app');
+      setTimeout(() => {
+        app.innerHTML =
+          '<ytd-browse page-subtype="home"><ytd-rich-grid-renderer><div id="contents"></div></ytd-rich-grid-renderer></ytd-browse>';
+        const contents = app.querySelector('#contents');
+        // Polymer-like: empty shells first, data a tick later.
+        const shells = FEED.map(() => {
+          const s = shell();
+          contents.append(s);
+          return s;
+        });
+        const ad = shell();
+        ad.innerHTML =
+          '<ytd-ad-slot-renderer><div class="thumb"></div><h3>Buy things</h3></ytd-ad-slot-renderer>';
+        contents.append(ad);
+        requestAnimationFrame(() => shells.forEach((s, i) => fill(s, FEED[i])));
+        // Shorts shelf
+        setTimeout(() => {
+          const sec = document.createElement('ytd-rich-section-renderer');
+          sec.innerHTML =
+            '<ytd-rich-shelf-renderer is-shorts><h2>Shorts</h2><div id="contents"></div></ytd-rich-shelf-renderer>';
+          contents.append(sec);
+          const sc = sec.querySelector('#contents');
+          [
+            ['s1', 'crazy prank gone wrong', 'Pranks', ''],
+            ['s2', 'lofi in 30 seconds', 'Lofi Girl', ''],
+          ].forEach((v) => {
+            const s = shell(true);
+            fill(s, v, true);
+            sc.append(s);
+          });
+        }, 120);
+        // Infinite scroll
+        setTimeout(
+          () =>
+            MORE.forEach((v) => {
+              const s = shell();
+              contents.append(s);
+              fill(s, v);
+            }),
+          900,
+        );
+        // Recycle: YouTube rebinds an existing card to a new video.
+        setTimeout(() => {
+          const s = shells[2];
+          s.querySelector('a').setAttribute('href', '/watch?v=v16');
+          s.querySelector('h3').textContent = 'Why Everyone Is Wrong About Rust (Honest Reaction)';
+          s.querySelector('.meta').textContent = 'ThePrimeTime';
+        }, 2500);
+      }, 30);
+    </script>
+  </body>
+</html>
