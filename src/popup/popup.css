@@ -1,0 +1,153 @@
+@import '../ui/base.css';
+
+body {
+  width: 360px;
+}
+
+#app {
+  display: grid;
+  gap: var(--s3);
+  padding: var(--s4);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.mark {
+  width: 20px;
+  height: 20px;
+  color: var(--lamp);
+}
+.name {
+  flex: 1;
+  font-weight: var(--fw-bold);
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  padding: var(--s4);
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  border-color: var(--lamp);
+  transition: background var(--t-ui) var(--ease);
+}
+.profile:hover {
+  background: var(--raised);
+}
+.picon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-control);
+  background: var(--lamp-wash);
+  color: var(--lamp);
+}
+.picon .icon-svg {
+  width: 20px;
+  height: 20px;
+}
+.ptext {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.pname {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+}
+.chev {
+  color: var(--muted);
+  transition: transform var(--t-ui) var(--ease);
+}
+.profile[aria-expanded='true'] .chev {
+  transform: rotate(90deg);
+}
+.off .profile {
+  border-color: var(--line);
+}
+.off .picon {
+  background: var(--raised);
+  color: var(--muted);
+}
+
+.plist {
+  list-style: none;
+  margin: 0;
+  padding: var(--s1);
+  max-height: 260px;
+  overflow: auto;
+}
+.plist button {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  height: 40px;
+  padding: 0 var(--s3);
+  border: 0;
+  border-radius: var(--r-control);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-md);
+  text-align: left;
+  cursor: pointer;
+}
+.plist button:hover {
+  background: var(--raised);
+}
+.plist button .icon-svg {
+  color: var(--muted);
+}
+.plist button[aria-current='true'] {
+  color: var(--lamp);
+}
+.plist button[aria-current='true'] .icon-svg {
+  color: var(--lamp);
+}
+.plist .grow {
+  flex: 1;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+  margin: 0;
+}
+.stats > div {
+  padding: var(--s3);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.stats dt {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.stats dd {
+  margin: var(--s1) 0 0;
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  min-height: 20px;
+}
+.foot .status {
+  min-width: 0;
+}

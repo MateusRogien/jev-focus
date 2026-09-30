@@ -1,0 +1,174 @@
+/*
+ * Injected by the manifest at document_start, before YouTube paints anything.
+ *
+ * Every card is hidden until the content script tags it. States (data-jf on the card):
+ *   (none) | pending  → content visibility:hidden, a skeleton drawn by ::before/::after
+ *   allowed           → content fades in
+ *   pass              → content shown instantly (surface not filtered, current video…)
+ *   blocked           → skeleton "exhales" (scale .96 + fade), then JS sets gone
+ *   gone | held       → display:none (held = fail-closed, retried later)
+ *
+ * __ALL__, __FEED__, … are replaced at build time with the lists in selectors.ts.
+ * html[data-jf-off] (master switch off) disables all of it.
+ */
+
+html {
+  --jf-sk: #ececec;
+  --jf-sk-hi: #f4f4f4;
+  --jf-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+html[dark] {
+  --jf-sk: #1a1c23;
+  --jf-sk-hi: #22252e;
+}
+
+/* Content is invisible — not just transparent — until allowed: nothing leaks to
+   screenshots, hover previews or the accessibility tree. */
+html:not([data-jf-off]) :is(__ALL__):not([data-jf='allowed'], [data-jf='pass']),
+html:not([data-jf-off]) :is(__ALL__):not([data-jf='allowed'], [data-jf='pass']) * {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+html:not([data-jf-off]) :is(__FEED__):not([data-jf='allowed'], [data-jf='pass']) {
+  position: relative;
+}
+
+/* Skeleton geometry below uses :where() so later rules win by source order; :is() would
+   take the highest specificity in the whole list and make overrides unpredictable. */
+
+/* Skeleton: ::before is the thumbnail, ::after the two text lines. Percent margins
+   resolve against width, which keeps the thumbnail at 16:9 without layout reads. */
+html:not([data-jf-off])
+  :is(__ALL__):is(:not([data-jf]), [data-jf='pending'], [data-jf='blocked'])::before,
+html:not([data-jf-off])
+  :is(__FEED__):is(:not([data-jf]), [data-jf='pending'], [data-jf='blocked'])::after {
+  content: '';
+  position: absolute;
+  visibility: visible !important;
+  pointer-events: none;
+  z-index: 2;
+  background: var(--jf-sk);
+  animation: jf-pulse 1.4s var(--jf-ease) infinite alternate;
+}
+
+/* Grid card (home, subscriptions): thumbnail on top. */
+html:not([data-jf-off]) :where(__FEED__)::before {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  padding-top: 56.25%;
+  border-radius: 12px;
+}
+html:not([data-jf-off]) :where(__FEED__)::after {
+  top: 0;
+  left: 0;
+  width: 78%;
+  height: 12px;
+  margin-top: calc(56.25% + 14px);
+  border-radius: 4px;
+  box-shadow: 0 22px 0 0 var(--jf-sk);
+}
+
+/* Horizontal card (sidebar, search): thumbnail on the left. */
+html:not([data-jf-off]) :where(__HORIZ__)::before {
+  width: min(40%, 168px);
+  padding-top: min(22.5%, 94.5px);
+}
+html:not([data-jf-off]) ytd-video-renderer::before,
+html:not([data-jf-off]) ytd-search yt-lockup-view-model::before {
+  width: min(50%, 500px);
+  padding-top: min(28.125%, 281px);
+}
+html:not([data-jf-off]) :where(__HORIZ__)::after {
+  left: calc(min(40%, 168px) + 8px);
+  width: auto;
+  right: 12%;
+  margin-top: 2px;
+}
+html:not([data-jf-off]) ytd-video-renderer::after,
+html:not([data-jf-off]) ytd-search yt-lockup-view-model::after {
+  left: calc(min(50%, 500px) + 16px);
+}
+
+/* Shorts card: one tall block. */
+html:not([data-jf-off]) :where(__SHORTS__)::before {
+  inset: 0;
+  height: auto;
+  padding-top: 0;
+  width: auto;
+}
+html:not([data-jf-off]) :where(__SHORTS__)::after {
+  display: none;
+}
+
+/* Player cards are already positioned; cover them exactly. */
+html:not([data-jf-off]) :where(__PLAYER__)::before {
+  inset: 0;
+  border-radius: 0;
+}
+
+/* Allowed: fade content in. Opacity only, on direct children, so it composites. */
+html:not([data-jf-off]) :is(__ALL__)[data-jf='allowed'] > * {
+  animation: jf-in 150ms var(--jf-ease) both;
+}
+
+/* Blocked: the skeleton exhales. Content underneath stays hidden throughout. */
+html:not([data-jf-off]) :is(__ALL__)[data-jf='blocked'] {
+  animation: jf-exhale 220ms var(--jf-ease) forwards;
+}
+html:not([data-jf-off]) :is(__ALL__)[data-jf='blocked']::before,
+html:not([data-jf-off]) :is(__ALL__)[data-jf='blocked']::after {
+  animation: none;
+}
+
+html:not([data-jf-off]) :is(__ALL__):is([data-jf='gone'], [data-jf='held']) {
+  display: none !important;
+}
+
+/* Shelves whose every card is hidden disappear with them. */
+/*__SHELVES__*/
+
+/* Hide Shorts entirely. */
+html:not([data-jf-off])[data-jf-noshorts] :is(__SHORT_CONTAINERS__, __SHORT_ENTRY__) {
+  display: none !important;
+}
+
+/* Floating pill host. Styles for its content live in its shadow root. */
+#jev-focus-pill {
+  all: initial;
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 2147483000;
+}
+
+@keyframes jf-pulse {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes jf-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes jf-exhale {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-jf-off]) :is(__ALL__),
+  html:not([data-jf-off]) :is(__ALL__) > *,
+  html:not([data-jf-off]) :is(__ALL__)::before,
+  html:not([data-jf-off]) :is(__ALL__)::after {
+    animation: none !important;
+  }
+}

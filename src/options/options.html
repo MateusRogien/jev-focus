@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jev Focus — Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <nav class="nav" aria-label="Sections">
+        <div class="brand">
+          <svg class="mark" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="8" cy="6.5" r="3" fill="currentColor" />
+            <rect x="2.5" y="11" width="11" height="1.5" rx="0.75" fill="currentColor" />
+          </svg>
+          Jev Focus
+        </div>
+        <a href="#key">API key &amp; provider</a>
+        <a href="#profiles">Profiles</a>
+        <a href="#surfaces">Surfaces</a>
+        <a href="#behaviour">Strictness &amp; failure</a>
+        <a href="#channels">Channel lists</a>
+        <a href="#cache">Cache</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#about">About</a>
+      </nav>
+
+      <main class="content">
+        <section id="key" class="section">
+          <h2>API key &amp; provider</h2>
+          <p class="muted small">
+            Jev Focus has no backend. Classification requests go from this browser straight to the
+            provider you pick, using your own key.
+          </p>
+
+          <div class="card pad grid">
+            <div class="row">
+              <span class="label">Provider</span>
+              <div class="seg" id="provider" role="group" aria-label="Provider"></div>
+            </div>
+
+            <label class="field">
+              <span id="key-label">API key</span>
+              <span class="keyrow">
+                <input
+                  class="input mono"
+                  id="key-input"
+                  type="password"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder="Paste your key"
+                />
+                <button
+                  class="btn icon"
+                  type="button"
+                  id="key-reveal"
+                  aria-label="Show key"
+                ></button>
+              </span>
+            </label>
+            <p class="xs muted" id="key-where"></p>
+
+            <div class="actions">
+              <button class="btn primary" type="button" id="key-save">Save key</button>
+              <button class="btn" type="button" id="key-test">Test connection</button>
+              <button class="btn danger" type="button" id="key-remove">Remove key</button>
+              <span class="status" id="key-status" aria-live="polite"></span>
+            </div>
+
+            <details class="advanced">
+              <summary class="small">Advanced: base URL and model</summary>
+              <div class="grid two">
+                <label class="field"
+                  >Base URL <input class="input mono" id="base-url" spellcheck="false"
+                /></label>
+                <label class="field"
+                  >Model <input class="input mono" id="model" spellcheck="false"
+                /></label>
+              </div>
+              <p class="xs muted" id="adv-note"></p>
+              <div class="actions">
+                <button class="btn" type="button" id="adv-save">Save</button>
+                <button class="btn ghost" type="button" id="adv-reset">Reset to default</button>
+                <span class="status" id="adv-status" aria-live="polite"></span>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <section id="profiles" class="section">
+          <h2>Profiles</h2>
+          <p class="muted small">
+            A profile is the list of categories Jev sorts each video into. Videos in allowed
+            categories stay; everything else is hidden. Presets are read-only. Duplicate one to edit
+            it.
+          </p>
+          <div class="profiles">
+            <div class="card plist" id="plist" role="listbox" aria-label="Profiles"></div>
+            <div class="card pad editor" id="editor"></div>
+          </div>
+        </section>
+
+        <section id="surfaces" class="section">
+          <h2>Surfaces</h2>
+          <p class="muted small">
+            Where filtering applies. The video you're watching is never touched.
+          </p>
+          <div class="card list" id="surface-list"></div>
+        </section>
+
+        <section id="behaviour" class="section">
+          <h2>Strictness &amp; failure</h2>
+          <div class="card list">
+            <div class="item">
+              <div>
+                <h3>Strictness <span class="muted small" id="strict-profile"></span></h3>
+                <p class="small muted" id="strict-help"></p>
+              </div>
+              <div class="seg" id="strictness" role="group" aria-label="Strictness"></div>
+            </div>
+            <div class="item">
+              <div>
+                <h3>When Jev is unavailable</h3>
+                <p class="small muted">
+                  No key, bad key, rate limit, offline, or a response slower than 3 s.
+                </p>
+              </div>
+              <div class="seg" id="failmode" role="group" aria-label="Failure mode"></div>
+            </div>
+            <div class="item">
+              <div>
+                <h3>Floating counter</h3>
+                <p class="small muted">"12 hidden · Deep Work" in the corner of YouTube.</p>
+              </div>
+              <label class="switch"
+                ><input
+                  type="checkbox"
+                  id="show-pill"
+                  aria-label="Show floating counter" /><span></span
+              ></label>
+            </div>
+          </div>
+        </section>
+
+        <section id="channels" class="section">
+          <h2>Channel lists</h2>
+          <p class="muted small">
+            Checked locally before Jev is asked, so listed channels never cost an API call. One
+            channel name or @handle per line. Block wins over allow.
+          </p>
+          <div class="grid two">
+            <label class="field"
+              >Always allow
+              <textarea class="input" id="allow" rows="6" spellcheck="false"></textarea>
+            </label>
+            <label class="field"
+              >Always block
+              <textarea class="input" id="block" rows="6" spellcheck="false"></textarea>
+            </label>
+          </div>
+          <p class="xs muted status" id="lists-status" aria-live="polite"></p>
+        </section>
+
+        <section id="cache" class="section">
+          <h2>Cache</h2>
+          <div class="card list">
+            <div class="item">
+              <div>
+                <h3><span class="num" id="cache-size">—</span> videos cached</h3>
+                <p class="small muted">
+                  Jev's answer for each video is kept for 7 days (at most 5,000), per profile. It
+                  holds video ids and category probabilities, nothing else.
+                </p>
+              </div>
+              <button class="btn" type="button" id="cache-clear">Clear cache</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="privacy" class="section">
+          <h2>Privacy</h2>
+          <div class="card pad prose">
+            <h3>What is sent</h3>
+            <p>
+              For each video card on a surface you've turned on: its <strong>title</strong>,
+              <strong>channel name</strong>, <strong>duration</strong>, and any visible
+              <strong>badges</strong> (LIVE, Premiere, Shorts, Mix, Playlist). For mixes and
+              playlists, the first two video titles listed on the card. Also the names and
+              descriptions of your profile's categories.
+            </p>
+            <h3>Where</h3>
+            <p>
+              Only to the provider selected above (<span id="privacy-host" class="mono"></span>),
+              over HTTPS, from the extension's background worker. The request carries no cookies and
+              no referrer.
+            </p>
+            <h3>What is never sent</h3>
+            <p>
+              Your watch history, account, cookies, the page URL, search terms, the video you're
+              watching, view counts, thumbnails, or anything else about you.
+            </p>
+            <h3>What is stored, and where</h3>
+            <p>
+              Everything stays in this browser's extension storage
+              (<code>chrome.storage.local</code>, not synced): your settings, your API key, the
+              decision cache, and today's counters. YouTube's page can't read extension storage, and
+              the content script never gets the key. There is no analytics and no server of ours.
+            </p>
+          </div>
+        </section>
+
+        <section id="about" class="section">
+          <h2>About</h2>
+          <div class="card pad prose">
+            <p>
+              Jev Focus <span id="version" class="num"></span> ·
+              <a href="https://github.com/mateusrogien/jev-focus" target="_blank" rel="noopener"
+                >GitHub</a
+              >
+              · MIT License
+            </p>
+            <p class="small muted">
+              An independent community project. Not affiliated with or endorsed by TypeSafe AI. Jev
+              is a model by TypeSafe AI.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="options.js"></script>
+  </body>
+</html>
